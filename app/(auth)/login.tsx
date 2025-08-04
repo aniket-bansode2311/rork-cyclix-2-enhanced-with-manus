@@ -25,7 +25,7 @@ export default function LoginScreen() {
   const [lastAttemptTime, setLastAttemptTime] = useState(0);
   const [connectionStatus, setConnectionStatus] = useState<string>('');
   const { login, isLoggingIn, loginError, clearErrors } = useAuth();
-  const cooldownInterval = useRef<NodeJS.Timeout | null>(null);
+  const cooldownInterval = useRef<ReturnType<typeof setInterval> | null>(null);
   const passwordInputRef = useRef<TextInput>(null);
 
   // Test connection on component mount
@@ -40,7 +40,8 @@ export default function LoginScreen() {
           setConnectionStatus(`❌ Connection Failed: ${result.error?.message || 'Unknown error'}`);
         }
       } catch (error) {
-        setConnectionStatus(`❌ Test Failed: ${error.message}`);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        setConnectionStatus(`❌ Test Failed: ${errorMessage}`);
       }
     };
     testConnection();

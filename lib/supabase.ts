@@ -70,7 +70,8 @@ export const testSupabaseConnection = async () => {
     return { success: true, tests };
   } catch (error) {
     console.error('❌ Connection test failed:', error);
-    tests.push({ name: 'Connection test', success: false, error: error.message });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    tests.push({ name: 'Connection test', success: false, error: errorMessage });
     return { success: false, error, tests };
   }
 };
