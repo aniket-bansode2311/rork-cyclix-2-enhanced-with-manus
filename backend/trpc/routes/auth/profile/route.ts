@@ -17,6 +17,7 @@ export const getProfile = protectedProcedure
       // Create default profile if it doesn't exist
       const defaultProfile = {
         user_id: ctx.user.id,
+        full_name: ctx.user.user_metadata?.name || ctx.user.email?.split('@')[0] || 'User',
         average_cycle_length: 28,
         average_period_length: 5,
         is_pregnancy_mode: false,
@@ -40,6 +41,7 @@ export const getProfile = protectedProcedure
 
 export const updateProfile = protectedProcedure
   .input(z.object({
+    full_name: z.string().optional(),
     average_cycle_length: z.number().optional(),
     average_period_length: z.number().optional(),
     last_period_start: z.string().nullable().optional(),

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
-import { format } from 'date-fns';
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
+import { format, parseISO } from 'date-fns';
 import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
 
@@ -19,7 +19,11 @@ export default function LogSymptomScreen() {
 
 function LogSymptomContent() {
   const router = useRouter();
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const { date } = useLocalSearchParams<{ date?: string }>();
+  
+  // Use the date from URL params if provided, otherwise use today
+  const initialDate = date ? parseISO(date) : new Date();
+  const [selectedDate, setSelectedDate] = useState(initialDate);
   
   const handleDateChange = (days: number) => {
     const newDate = new Date(selectedDate);

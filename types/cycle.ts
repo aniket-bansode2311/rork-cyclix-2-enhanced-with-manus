@@ -44,6 +44,7 @@ export interface Cycle {
 }
 
 export interface UserProfile {
+  fullName?: string;
   averageCycleLength: number;
   averagePeriodLength: number;
   lastPeriodStart?: string;

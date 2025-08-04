@@ -98,6 +98,7 @@ export const [CycleContext, useCycleStore] = createContextHook(() => {
     if (profileQuery.data) {
       console.log('Profile data loaded:', profileQuery.data);
       setUserProfile({
+        fullName: profileQuery.data.full_name,
         averageCycleLength: profileQuery.data.average_cycle_length,
         averagePeriodLength: profileQuery.data.average_period_length,
         lastPeriodStart: profileQuery.data.last_period_start,
@@ -278,6 +279,9 @@ export const [CycleContext, useCycleStore] = createContextHook(() => {
     if (!isAuthenticated) return;
     
     const updates: any = {};
+    if (profile.fullName !== undefined) {
+      updates.full_name = profile.fullName;
+    }
     if (profile.averageCycleLength !== undefined) {
       updates.average_cycle_length = profile.averageCycleLength;
     }

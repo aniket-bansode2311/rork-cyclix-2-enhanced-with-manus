@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, TextInput, Alert } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
-import { format } from 'date-fns';
+import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
+import { format, parseISO } from 'date-fns';
 import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
 
@@ -18,8 +18,12 @@ export default function LogPeriodScreen() {
 
 function LogPeriodContent() {
   const router = useRouter();
+  const { date } = useLocalSearchParams<{ date?: string }>();
   const { addPeriodLog } = useCycleStore();
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  
+  // Use the date from URL params if provided, otherwise use today
+  const initialDate = date ? parseISO(date) : new Date();
+  const [selectedDate, setSelectedDate] = useState(initialDate);
   const [selectedFlow, setSelectedFlow] = useState<'light' | 'medium' | 'heavy' | 'spotting'>('medium');
   const [notes, setNotes] = useState('');
   

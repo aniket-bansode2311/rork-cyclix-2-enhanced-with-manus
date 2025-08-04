@@ -5,6 +5,7 @@ ALTER DATABASE postgres SET "app.jwt_secret" TO 'your-jwt-secret';
 CREATE TABLE IF NOT EXISTS public.profiles (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    full_name TEXT,
     average_cycle_length INTEGER DEFAULT 28 NOT NULL,
     average_period_length INTEGER DEFAULT 5 NOT NULL,
     last_period_start DATE,

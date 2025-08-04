@@ -11,7 +11,7 @@ import { useAuth } from '@/hooks/use-auth';
 export default function HomeHeader() {
   const router = useRouter();
   const { userProfile, isSyncing, lastSyncTime, manualSync } = useCycleStore();
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   
   const handleSettingsPress = () => {
     router.push('/(tabs)/settings');
@@ -36,7 +36,7 @@ export default function HomeHeader() {
       <View style={styles.headerContent}>
         <View>
           <Text style={styles.greeting}>
-            Hello{isAuthenticated && user ? `, ${user.name}` : ''}!
+            Hello{isAuthenticated && userProfile.fullName ? `, ${userProfile.fullName}` : ''}!
           </Text>
           <Text style={styles.date}>{format(new Date(), 'EEEE, MMMM d')}</Text>
         </View>

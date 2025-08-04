@@ -246,11 +246,11 @@ export default function CalendarView() {
   };
 
   const handleAddLog = () => {
-    router.push('/log-period');
+    router.push(`/log-period?date=${selectedDate}`);
   };
 
   const handleAddSymptom = () => {
-    router.push('/log-symptom');
+    router.push(`/log-symptom?date=${selectedDate}`);
   };
 
   if (isLoading) {
