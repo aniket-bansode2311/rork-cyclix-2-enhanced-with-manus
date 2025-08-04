@@ -17,7 +17,82 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables. Please set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Network diagnostics function
+export const testSupabaseConnection = async () => {
+  console.log('🔍 Testing Supabase connection...');
+  console.log('URL:', supabaseUrl);
+  console.log('Key (first 20 chars):', supabaseAnonKey?.substring(0, 20) + '...');
+  
+  const tests = [];
+  
+  try {
+    // Test 1: Basic connectivity to main URL
+    console.log('Test 1: Basic connectivity...');
+    const basicResponse = await fetch(supabaseUrl, {
+      method: 'HEAD',
+      headers: {
+        'apikey': supabaseAnonKey || '',
+      },
+    });
+    tests.push({ name: 'Basic connectivity', success: true, status: basicResponse.status });
+    console.log('✅ Basic connectivity:', basicResponse.status, basicResponse.statusText);
+    
+    // Test 2: REST API endpoint
+    console.log('Test 2: REST API endpoint...');
+    const restResponse = await fetch(supabaseUrl + '/rest/v1/', {
+      method: 'HEAD',
+      headers: {
+        'apikey': supabaseAnonKey || '',
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+      },
+    });
+    tests.push({ name: 'REST API', success: true, status: restResponse.status });
+    console.log('✅ REST API test:', restResponse.status, restResponse.statusText);
+    
+    // Test 3: Auth endpoint
+    console.log('Test 3: Auth endpoint...');
+    const authResponse = await fetch(supabaseUrl + '/auth/v1/settings', {
+      method: 'GET',
+      headers: {
+        'apikey': supabaseAnonKey || '',
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+      },
+    });
+    tests.push({ name: 'Auth endpoint', success: true, status: authResponse.status });
+    console.log('✅ Auth endpoint test:', authResponse.status, authResponse.statusText);
+    
+    // Test 4: Try a simple auth operation
+    console.log('Test 4: Auth session check...');
+    const sessionResponse = await supabase.auth.getSession();
+    tests.push({ name: 'Session check', success: !sessionResponse.error, data: sessionResponse });
+    console.log('✅ Session check:', sessionResponse.error ? 'Failed' : 'Success');
+    
+    return { success: true, tests };
+  } catch (error) {
+    console.error('❌ Connection test failed:', error);
+    tests.push({ name: 'Connection test', success: false, error: error.message });
+    return { success: false, error, tests };
+  }
+};
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false,
+    flowType: 'pkce'
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'supabase-js-react-native'
+    }
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 10
+    }
+  }
+});
 
 export type Database = {
   public: {

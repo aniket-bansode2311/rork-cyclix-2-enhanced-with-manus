@@ -14,6 +14,7 @@ import { Link } from 'expo-router';
 import { Eye, EyeOff, Mail, Lock, Clock } from 'lucide-react-native';
 
 import { useAuth } from '@/hooks/use-auth';
+import { testSupabaseConnection } from '@/lib/supabase';
 import Colors from '@/constants/colors';
 
 export default function LoginScreen() {
@@ -22,9 +23,28 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [rateLimitCooldown, setRateLimitCooldown] = useState(0);
   const [lastAttemptTime, setLastAttemptTime] = useState(0);
+  const [connectionStatus, setConnectionStatus] = useState<string>('');
   const { login, isLoggingIn, loginError, clearErrors } = useAuth();
   const cooldownInterval = useRef<NodeJS.Timeout | null>(null);
   const passwordInputRef = useRef<TextInput>(null);
+
+  // Test connection on component mount
+  useEffect(() => {
+    const testConnection = async () => {
+      setConnectionStatus('Testing connection...');
+      try {
+        const result = await testSupabaseConnection();
+        if (result.success) {
+          setConnectionStatus('✅ Connection OK');
+        } else {
+          setConnectionStatus(`❌ Connection Failed: ${result.error?.message || 'Unknown error'}`);
+        }
+      } catch (error) {
+        setConnectionStatus(`❌ Test Failed: ${error.message}`);
+      }
+    };
+    testConnection();
+  }, []);
 
   // Clear errors when component unmounts
   useEffect(() => {
@@ -181,6 +201,9 @@ export default function LoginScreen() {
         <View style={styles.header}>
           <Text style={styles.title}>Welcome Back</Text>
           <Text style={styles.subtitle}>Sign in to continue tracking your cycle</Text>
+          {connectionStatus && (
+            <Text style={styles.connectionStatus}>{connectionStatus}</Text>
+          )}
         </View>
 
         <View style={styles.form}>
@@ -285,6 +308,27 @@ export default function LoginScreen() {
               </Text>
             </TouchableOpacity>
           </Link>
+
+          {/* Debug button - remove in production */}
+          <TouchableOpacity 
+            style={styles.debugButton}
+            onPress={async () => {
+              console.log('=== DEBUG INFO ===');
+              console.log('Environment variables:');
+              console.log('EXPO_PUBLIC_SUPABASE_URL:', process.env.EXPO_PUBLIC_SUPABASE_URL);
+              console.log('EXPO_PUBLIC_SUPABASE_ANON_KEY:', process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 20) + '...');
+              
+              const result = await testSupabaseConnection();
+              console.log('Connection test result:', result);
+              
+              Alert.alert('Debug Info', `Check console for detailed logs. Connection: ${result.success ? 'OK' : 'Failed'}`);
+            }}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.debugButtonText}>
+              🔧 Debug Connection
+            </Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.footer}>
@@ -445,5 +489,22 @@ const styles = StyleSheet.create({
   },
   disabledText: {
     opacity: 0.6,
+  },
+  connectionStatus: {
+    fontSize: 12,
+    color: Colors.light.darkGray,
+    textAlign: 'center',
+    marginTop: 8,
+    fontFamily: 'monospace',
+  },
+  debugButton: {
+    alignItems: 'center',
+    paddingVertical: 8,
+    marginTop: 8,
+  },
+  debugButtonText: {
+    color: Colors.light.darkGray,
+    fontSize: 12,
+    fontWeight: '500',
   },
 });

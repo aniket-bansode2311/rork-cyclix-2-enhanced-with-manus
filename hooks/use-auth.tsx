@@ -1,7 +1,7 @@
 import createContextHook from "@nkzw/create-context-hook";
 import { useEffect, useState } from "react";
 import { useRouter, useSegments } from "expo-router";
-import { supabase } from "@/lib/supabase";
+import { supabase, testSupabaseConnection } from "@/lib/supabase";
 import type { User, Session } from "@supabase/supabase-js";
 
 interface AuthState {
@@ -32,6 +32,12 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
+        // Test connection first
+        const connectionTest = await testSupabaseConnection();
+        if (!connectionTest.success) {
+          console.error('Supabase connection failed during initialization');
+        }
+
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -114,6 +120,14 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
 
     try {
       console.log('Attempting login for:', email);
+      console.log('Supabase URL:', process.env.EXPO_PUBLIC_SUPABASE_URL);
+      
+      // Test network connectivity first
+      const connectionTest = await testSupabaseConnection();
+      if (!connectionTest.success) {
+        throw new Error('Network connection failed. Please check your internet connection and try again.');
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password,
@@ -121,6 +135,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
 
       if (error) {
         console.error('Login error:', error.message);
+        console.error('Login error details:', error);
         setLoginError(error);
         setIsLoggingIn(false);
         throw error; // Re-throw to be caught by the component
