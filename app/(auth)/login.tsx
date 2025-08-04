@@ -37,7 +37,7 @@ export default function LoginScreen() {
         if (result.success) {
           setConnectionStatus('✅ Connection OK');
         } else {
-          setConnectionStatus(`❌ Connection Failed: ${result.error?.message || 'Unknown error'}`);
+          setConnectionStatus(`❌ Connection Failed: ${(result.error as Error)?.message || 'Unknown error'}`);
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
